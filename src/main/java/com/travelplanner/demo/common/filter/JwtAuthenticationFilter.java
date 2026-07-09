@@ -1,5 +1,6 @@
 package com.travelplanner.demo.common.filter;
 
+import com.travelplanner.demo.common.service.RedisService;
 import com.travelplanner.demo.common.token.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,12 +21,14 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final RedisService redisService;
 
     private static final List<String> WHITE_LIST = List.of(
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/api/v1/auth/register",
-            "/api/v1/auth/login"
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh"
     );
 
     @Override
@@ -59,6 +62,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰 검증
         if (!jwtProvider.validateToken(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // 블랙리스트 체크 (로그아웃된 토큰 차단)
+        if (redisService.isBlacklisted(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

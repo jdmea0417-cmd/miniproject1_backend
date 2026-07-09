@@ -1,6 +1,6 @@
 package com.travelplanner.demo.destination.entity;
 
-import com.travelplanner.demo.travelplan.entity.TravelPlan;
+import com.travelplanner.demo.travelplan.entity.TravelPlanEntity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,9 +19,9 @@ public class DestinationEntity {
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Travel_ID", nullable = false)
-    private TravelPlan travelPlan;
+    private TravelPlanEntity travelPlan;
 
     @Column(name = "TIME")
     private String time;
