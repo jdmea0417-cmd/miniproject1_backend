@@ -8,6 +8,7 @@ import com.travelplanner.demo.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class UserController {
 
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         System.out.println(">>>> debug user controller register");
         System.out.println(">>>> debug params : "+request); 
         UserResponse response = userService.register(request);
