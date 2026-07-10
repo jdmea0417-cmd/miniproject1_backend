@@ -1,5 +1,7 @@
 package com.travelplanner.demo.destination.dto;
 
+import com.travelplanner.demo.destination.entity.DestinationEntity;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -22,4 +24,13 @@ public class DestinationResponse {
 
     @Schema(description = "장소명", example = "경복궁")
     private String place;
+
+    public static DestinationResponse fromEntity(DestinationEntity entity) {
+        return DestinationResponse.builder()
+            .id(entity.getId())
+            .date(entity.getDate())
+            .time(entity.getTime())
+            .place(entity.getPlace())
+            .build();
+    }
 }

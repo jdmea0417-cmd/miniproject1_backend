@@ -1,6 +1,8 @@
 package com.travelplanner.demo.common.config;
 
 import com.travelplanner.demo.common.filter.JwtAuthenticationFilter;
+import com.travelplanner.demo.user.entity.UserEntity;
+import com.travelplanner.demo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +10,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,7 +27,9 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserRepository userRepository;
+    private final com.travelplanner.demo.common.token.JwtProvider jwtProvider;
+    private final com.travelplanner.demo.common.service.RedisService redisService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,17 +37,28 @@ public class SecurityConfig {
     }
 
     @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            UserEntity user = userRepository.findByUserId(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+            return User.builder()
+                    .username(user.getUserId())
+                    .password(user.getPassword())
+                    .authorities(Collections.emptyList())
+                    .build();
+        };
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setExposedHeaders(java.util.List.of("Authorization", "Refresh-Token"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 
@@ -49,14 +67,14 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

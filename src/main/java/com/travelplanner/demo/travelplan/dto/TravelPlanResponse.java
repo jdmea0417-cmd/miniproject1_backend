@@ -1,5 +1,8 @@
 package com.travelplanner.demo.travelplan.dto;
 
+import com.travelplanner.demo.travelplan.entity.TravelPlanEntity;
+import com.travelplanner.demo.user.entity.UserEntity;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -33,4 +36,20 @@ public class TravelPlanResponse {
 
     @Schema(description = "여행지 목록")
     private List<DestinationResponse> destinations;
+
+    public static TravelPlanResponse fromEntity(TravelPlanEntity entity) {
+        return TravelPlanResponse.builder()
+                .id(entity.getId())
+                .userId(entity.getUser().getUserId())
+                .area(entity.getArea())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .destinations(
+                        entity.getDestinations()
+                                .stream()
+                                .map(DestinationResponse::fromEntity)
+                                .toList())
+                .build();
+    }
+    
 }

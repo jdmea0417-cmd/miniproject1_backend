@@ -55,6 +55,43 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
+    public long getRemainingExpirationTime(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            Date expiration = claims.getExpiration();
+            return Math.max(0, expiration.getTime() - System.currentTimeMillis());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public String getUserIdFromRefreshToken(String refreshToken) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(refreshToken)
+                .getBody();
+        return claims.getSubject();
+    }
+
+    public Date getExpiration(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration();
+    }
+
+    public long getAccessTokenExpiryMillis() {
+        return ACCESS_TOKEN_EXPIRY;
+    }
+
+    public long getRefreshTokenExpiryMillis() {
+        return REFRESH_TOKEN_EXPIRY;
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser()

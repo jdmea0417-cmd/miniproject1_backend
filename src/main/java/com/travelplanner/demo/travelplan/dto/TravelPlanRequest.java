@@ -1,7 +1,12 @@
 package com.travelplanner.demo.travelplan.dto;
 
+import com.travelplanner.demo.travelplan.entity.TravelPlanEntity;
+import com.travelplanner.demo.user.entity.UserEntity;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -29,6 +34,12 @@ public class TravelPlanRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
-    @Schema(description = "여행지 목록")
+    @Schema(description = "여행지 키워드 목록")
+    @NotEmpty(message = "At least one destination keyword is required")
     private List<DestinationRequest> destinations;
+
+    @AssertTrue(message = "시작일은 종료일 이전이거나 같아야 합니다")
+    public boolean isDateRangeValid() {
+        return startDate == null || endDate == null || !startDate.isAfter(endDate);
+    }
 }

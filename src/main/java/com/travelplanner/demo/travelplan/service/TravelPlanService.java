@@ -1,126 +1,111 @@
 package com.travelplanner.demo.travelplan.service;
 
+import com.travelplanner.demo.travelplan.ai.agent.TravelPlanAIAgent;
 import com.travelplanner.demo.travelplan.dto.TravelPlanRequest;
 import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
-import com.travelplanner.demo.travelplan.entity.TravelPlan;
+import com.travelplanner.demo.travelplan.entity.TravelPlanEntity;
 import com.travelplanner.demo.travelplan.repository.TravelPlanRepository;
+import com.travelplanner.demo.user.entity.UserEntity;
+import com.travelplanner.demo.user.repository.UserRepository;
 import com.travelplanner.demo.destination.dto.DestinationResponse;
 import com.travelplanner.demo.destination.entity.DestinationEntity;
-import com.travelplanner.demo.destination.repository.DestinationRepository;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class TravelPlanService {
 
+    private final UserRepository userRepository;
     private final TravelPlanRepository travelPlanRepository;
-    private final DestinationRepository destinationRepository;
+    private final TravelPlanAIAgent travelPlanAIAgent;
 
-    public TravelPlanResponse createTravelPlan(String userId, TravelPlanRequest request) {
-        TravelPlan travelPlan = TravelPlan.builder()
-                .userId(userId)
+    public TravelPlanResponse create(String userId, TravelPlanRequest request) {
+        log.info("여행 계획 생성 요청: userId={}, area={}", userId, request.getArea());
+
+        // AI로 여행 계획 생성 (TravelPlanResponse 반환)
+        TravelPlanResponse aiResponse = travelPlanAIAgent.generateTravelPlan(request);
+
+        // UserEntity 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        // AI 응답을 Entity로 변환하여 저장
+        TravelPlanEntity plan = TravelPlanEntity.builder()
+                .user(user)
                 .area(request.getArea())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
                 .build();
 
-        TravelPlan saved = travelPlanRepository.save(travelPlan);
-
-        if (request.getDestinations() != null && !request.getDestinations().isEmpty()) {
-            List<DestinationEntity> destinations = request.getDestinations().stream()
-                    .map(destReq -> DestinationEntity.builder()
-                            .travelPlan(saved)
-                            .place(extractPlaceFromKeywords(destReq.getKeywords()))
-                            .date(request.getStartDate().toString())
-                            .time(LocalTime.now().toString())
-                            .build())
-                    .collect(Collectors.toList());
-
-            saved.getDestinations().addAll(destinations);
-            destinationRepository.saveAll(destinations);
+        if (aiResponse.getDestinations() != null) {
+            for (DestinationResponse destResp : aiResponse.getDestinations()) {
+                DestinationEntity destination = DestinationEntity.builder()
+                        .travelPlan(plan)
+                        .place(destResp.getPlace())
+                        .date(destResp.getDate())
+                        .time(destResp.getTime())
+                        .build();
+                plan.addDestination(destination);
+            }
         }
 
-        TravelPlan finalPlan = travelPlanRepository.save(saved);
-        return toResponse(finalPlan);
+        TravelPlanEntity savedPlan = travelPlanRepository.save(plan);
+        return TravelPlanResponse.fromEntity(savedPlan);
     }
 
     @Transactional(readOnly = true)
     public List<TravelPlanResponse> getTravelPlans(String userId) {
-        return travelPlanRepository.findByUserIdOrderByIdDesc(userId).stream()
-                .map(this::toResponse)
+        return travelPlanRepository.findByUser_UserIdOrderByIdDesc(userId).stream()
+                .map(TravelPlanResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public TravelPlanResponse getTravelPlan(Integer id, String userId) {
-        TravelPlan travelPlan = travelPlanRepository.findByIdAndUserId(id, userId)
+        TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel plan not found: " + id));
-        return toResponse(travelPlan);
+        return TravelPlanResponse.fromEntity(travelPlan);
     }
 
     public TravelPlanResponse updateTravelPlan(Integer id, String userId, TravelPlanRequest request) {
-        TravelPlan travelPlan = travelPlanRepository.findByIdAndUserId(id, userId)
+        TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel plan not found: " + id));
 
+        // Update basic fields
         travelPlan.setArea(request.getArea());
+        travelPlan.setStartDate(request.getStartDate());
+        travelPlan.setEndDate(request.getEndDate());
 
-        destinationRepository.deleteAll(travelPlan.getDestinations());
+        // Clear existing destinations and replace with new ones
         travelPlan.getDestinations().clear();
 
-        if (request.getDestinations() != null && !request.getDestinations().isEmpty()) {
-            List<DestinationEntity> destinations = request.getDestinations().stream()
-                    .map(destReq -> DestinationEntity.builder()
-                            .travelPlan(travelPlan)
-                            .place(extractPlaceFromKeywords(destReq.getKeywords()))
-                            .date(request.getStartDate().toString())
-                            .time(LocalTime.now().toString())
-                            .build())
-                    .collect(Collectors.toList());
-
-            travelPlan.getDestinations().addAll(destinations);
-            destinationRepository.saveAll(destinations);
+        if (request.getDestinations() != null) {
+            for (com.travelplanner.demo.destination.dto.DestinationRequest destReq : request.getDestinations()) {
+                DestinationEntity destination = DestinationEntity.builder()
+                        .travelPlan(travelPlan)
+                        .place(destReq.getKeyword())
+                        .date(destReq.getDate())
+                        .time(destReq.getTime())
+                        .build();
+                travelPlan.addDestination(destination);
+            }
         }
 
-        TravelPlan updated = travelPlanRepository.save(travelPlan);
-        return toResponse(updated);
+        TravelPlanEntity saved = travelPlanRepository.save(travelPlan);
+        return TravelPlanResponse.fromEntity(saved);
     }
 
     public void deleteTravelPlan(Integer id, String userId) {
-        TravelPlan travelPlan = travelPlanRepository.findByIdAndUserId(id, userId)
+        TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel plan not found: " + id));
-
-        destinationRepository.deleteAll(travelPlan.getDestinations());
         travelPlanRepository.delete(travelPlan);
-    }
-
-    private String extractPlaceFromKeywords(List<String> keywords) {
-        if (keywords == null || keywords.isEmpty()) {
-            return "Unknown Place";
-        }
-        return String.join(", ", keywords);
-    }
-
-    private TravelPlanResponse toResponse(TravelPlan travelPlan) {
-        List<DestinationResponse> destinations = travelPlan.getDestinations().stream()
-                .map(dest -> DestinationResponse.builder()
-                        .id(dest.getId())
-                        .place(dest.getPlace())
-                        .date(dest.getDate())
-                        .time(dest.getTime())
-                        .build())
-                .collect(Collectors.toList());
-
-        return TravelPlanResponse.builder()
-                .id(travelPlan.getId())
-                .userId(travelPlan.getUserId())
-                .area(travelPlan.getArea())
-                .destinations(destinations)
-                .build();
     }
 }
