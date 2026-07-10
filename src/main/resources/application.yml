@@ -5,7 +5,7 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:mariadb://localhost:3306/miniproject
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
@@ -25,6 +25,7 @@ spring:
 #      port: 6379
 #      password:
 #      timeout: 6000ms
+
   ai:
     openai:
       api-key: ${OPEN_AI_KEY}
