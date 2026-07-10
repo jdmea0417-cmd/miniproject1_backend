@@ -51,4 +51,5 @@ public class TravelPlanResponse {
                                 .toList())
                 .build();
     }
+    
 }

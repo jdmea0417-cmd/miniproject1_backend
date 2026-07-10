@@ -34,7 +34,6 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 생성", description = "새로운 여행 계획을 생성합니다. (JWT 인증 필요)")
-    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<TravelPlanResponse> createTravelPlan(
             @Parameter(description = "요청 바디", required = true) @Valid @RequestBody TravelPlanRequest request) {
@@ -47,7 +46,6 @@ public class TravelPlanController {
     }
 
 @Operation(summary = "여행 계획 목록 조회", description = "인증된 사용자의 여행 계획 목록을 조회합니다. (JWT 인증 필요)")
-    @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     public ResponseEntity<List<TravelPlanResponse>> getTravelPlans() {
         String userId = getCurrentUserId();
@@ -59,7 +57,6 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "여행 계획 ID로 상세 정보를 조회합니다. (JWT 인증 필요)")
-    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
     public ResponseEntity<TravelPlanResponse> getTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
@@ -72,7 +69,6 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 수정", description = "기존 여행 계획을 수정합니다. (JWT 인증 필요)")
-    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     public ResponseEntity<TravelPlanResponse> updateTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id,
@@ -86,7 +82,6 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
-    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {

@@ -16,4 +16,9 @@ public class DestinationRequest {
     @NotBlank(message = "Keyword is required")
     private String keyword;
 
+    @Schema(description = "방문 날짜 (YYYY-MM-DD)", example = "2026-07-08")
+    private String date;
+
+    @Schema(description = "방문 시간 (HH:mm:ss)", example = "10:00:00")
+    private String time;
 }

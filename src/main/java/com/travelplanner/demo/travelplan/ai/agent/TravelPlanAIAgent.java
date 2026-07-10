@@ -12,6 +12,8 @@ import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
 
 import java.util.stream.Collectors;
 
+import com.travelplanner.demo.destination.dto.DestinationRequest;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,22 +45,28 @@ public class TravelPlanAIAgent {
                         """)
                 .user("""
                             너는 여행지에 따라 상세계획을 짜주는 전문가야
+                            동선과 식사 시간, 등을 고려하여
+                            식당, 숙소를 포함,
                             조건과 아래 규칙에 맞게 응답할 것
                             조건
                             - 지역 : "%s"
-                            - 여행 시작일 : "s"
-                            - 여행 종료일 : "s"
-                            - 필수 방문지 : "s"
+                            - 여행 시작일 : "%s"
+                            - 여행 종료일 : "%s"
+                            - 필수 방문지 : "%s"
                             출력예시
                             {
                                 "area" : "여행지역",
                                 "startDate" : "여행 시작일",
                                 "endDate" : "여행 종료일",
                                 "destinations" : [
-                                    {"date" : "여행지 방문일", "time" : "여행지 방문시간", "place" : "여행지"}
+                                    {
+                                        "date" : "여행지 방문일",
+                                        "time" : "여행지 방문시간",
+                                        "place" : "여행지"
+                                    }
                                 ]
                             }
-                        """.formatted(request.getArea(), request.getStartDate(), request.getEndDate(), request.getDestinations()))
+                        """.formatted(request.getArea(), request.getStartDate(), request.getEndDate(), request.getDestinations().stream().map(DestinationRequest::getKeyword).collect(Collectors.joining(", "))))
                 .call()
                 .entity(TravelPlanResponse.class);
 
