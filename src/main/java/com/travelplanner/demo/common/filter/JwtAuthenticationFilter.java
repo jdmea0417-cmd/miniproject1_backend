@@ -21,13 +21,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
 
-    private static final List<String> WHITE_LIST = List.of(
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/api/v1/auth/register",
-            "/api/v1/auth/login"
-    );
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -38,12 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // CORS preflight 요청은 통과
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // 화이트리스트 경로는 토큰 검증 없이 통과
-        if (isWhiteList(path)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -76,16 +63,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
-    }
-
-    private boolean isWhiteList(String path) {
-        return WHITE_LIST.stream()
-                .anyMatch(pattern -> {
-                    if (pattern.endsWith("/**")) {
-                        String prefix = pattern.substring(0, pattern.length() - 3);
-                        return path.startsWith(prefix);
-                    }
-                    return path.equals(pattern);
-                });
     }
 }
