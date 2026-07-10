@@ -1,7 +1,6 @@
 package com.travelplanner.demo.travelplan.service;
 
 import com.travelplanner.demo.travelplan.ai.agent.TravelPlanAIAgent;
-import com.travelplanner.demo.travelplan.ai.dto.AiTravelPlanResponse;
 import com.travelplanner.demo.travelplan.dto.TravelPlanRequest;
 import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
 import com.travelplanner.demo.travelplan.entity.TravelPlanEntity;
@@ -11,12 +10,14 @@ import com.travelplanner.demo.user.repository.UserRepository;
 import com.travelplanner.demo.destination.dto.DestinationResponse;
 import com.travelplanner.demo.destination.entity.DestinationEntity;
 import com.travelplanner.demo.destination.repository.DestinationRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -33,27 +34,28 @@ public class TravelPlanService {
     private final TravelPlanRepository travelPlanRepository;
     private final DestinationRepository destinationRepository;
     private final TravelPlanAIAgent travelPlanAIAgent;
+    private final ObjectMapper objectMapper;
 
     public TravelPlanResponse create(String userId, TravelPlanRequest request) {
         System.out.println(">>>> debug travel plan service create");
         System.out.println(">>>> debug request param : "+request);
         log.info("여행 계획 생성 요청: userId={}, area={}", userId, request.getArea());
 
-        // AI로 여행 계획 생성
-        AiTravelPlanResponse aiResponse = travelPlanAIAgent.generatePlan(request);
+        // AI로 여행 계획 생성 (JSON 문자열 반환)
+        TravelPlanResponse response = travelPlanAIAgent.generateTravelPlan(request);
 
         // UserEntity 조회
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         // AI 응답을 Entity로 변환하여 저장
-        TravelPlanEntity savedPlan = saveAiResponse(user, request, aiResponse);
+        TravelPlanEntity savedPlan = saveAiResponse(user, request, response);
 
         // Response로 변환하여 반환
         return toResponse(savedPlan);
     }
 
-    private TravelPlanEntity saveAiResponse(UserEntity user, TravelPlanRequest request, AiTravelPlanResponse aiResponse) {
+    private TravelPlanEntity saveAiResponse(UserEntity user, TravelPlanRequest request, TravelPlanResponse aiResponse) {
         TravelPlanEntity plan = TravelPlanEntity.builder()
                 .user(user)
                 .area(request.getArea())
@@ -61,26 +63,17 @@ public class TravelPlanService {
                 .endDate(request.getEndDate())
                 .build();
 
-        if (aiResponse.getDailyPlans() != null) {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate currentDate = request.getStartDate();
-
-            for (AiTravelPlanResponse.DailyPlan dailyPlan : aiResponse.getDailyPlans()) {
-                if (dailyPlan.getSchedule() != null) {
-                    for (AiTravelPlanResponse.TimeSlot slot : dailyPlan.getSchedule()) {
-                        DestinationEntity destination = DestinationEntity.builder()
-                                .travelPlan(plan)
-                                .place(slot.getPlace())
-                                .date(currentDate.format(dateFormatter))
-                                .time(slot.getTime())
-                                .build();
-                        plan.addDestination(destination);
-                    }
-                }
-                currentDate = currentDate.plusDays(1);
+        if (aiResponse.getDestinations() != null) {
+            for (DestinationResponse destResp : aiResponse.getDestinations()) {
+                DestinationEntity destination = DestinationEntity.builder()
+                        .travelPlan(plan)
+                        .place(destResp.getPlace())
+                        .date(destResp.getDate())
+                        .time(destResp.getTime())
+                        .build();
+                plan.addDestination(destination);
             }
         }
-
         return travelPlanRepository.save(plan);
     }
 

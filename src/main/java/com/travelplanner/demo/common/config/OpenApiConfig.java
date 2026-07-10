@@ -43,7 +43,7 @@ public class OpenApiConfig {
                         new Server().url("http://localhost:" + serverPort).description("로컬 개발 서버"),
                         new Server().url("https://api.travelplanner.example.com").description("프로덕션 서버")
                 ))
-                .components(new Components().addSecuritySchemes("bearerAuth", bearerAuth));
-                // 전역 보안 요구사항 미적용 → 각 컨트롤러/메서드에 @SecurityRequirement로 개별 지정
+                .components(new Components().addSecuritySchemes("bearerAuth", bearerAuth))
+                .security(List.of(securityRequirement));
     }
 }
