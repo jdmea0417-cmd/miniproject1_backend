@@ -66,7 +66,13 @@ public class TravelPlanAIAgent {
                                     }
                                 ]
                             }
-                        """.formatted(request.getArea(), request.getStartDate(), request.getEndDate(), request.getDestinations().stream().map(DestinationRequest::getKeyword).collect(Collectors.joining(", "))))
+                        """.formatted(
+                                request.getArea(), 
+                                request.getStartDate(), 
+                                request.getEndDate(), 
+                                request.getDestinations().stream()
+                                    .map(DestinationRequest::getKeyword)
+                                    .collect(Collectors.joining(", "))))
                 .call()
                 .entity(TravelPlanResponse.class);
 

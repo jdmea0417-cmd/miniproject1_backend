@@ -10,7 +10,6 @@ public class TravelPlanAIConfig {
     @Bean
     public ChatClient travelPlanChatClient(ChatClient.Builder builder) {
         return builder
-                .defaultSystem("당신은 전문 여행 플래너입니다.")
                 .build();
     }
 }
