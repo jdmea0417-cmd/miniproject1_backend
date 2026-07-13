@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.travelplanner'
+group = 'com.inspire'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -17,13 +17,26 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:1.0.0"
+    }
+}
+
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// swagger UI 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+	// validation
+	// annotation JSR - 303 
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// .env 보안이 필요한 정보를 로컬에 저장하고 git-hub 공유하지 않겠다는 목적 
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+	// Json Web Token lib 
 	// H2 Database for testing
 	testImplementation 'com.h2database:h2'
 
@@ -33,17 +46,40 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-	// Redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// h2
+	implementation  'com.h2database:h2'
+	
 
-	// .env 파일 자동 로드 (blog_jpa와 동일)
-	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+	// redis lib 
+	implementation "org.springframework.boot:spring-boot-starter-data-redis"
 
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	annotationProcessor 'org.projectlombok:lombok'
+	// spring-security
+	implementation "org.springframework.boot:spring-boot-starter-security"
+
+    // spring ai + open ai 
+  implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+  implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
+	implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
+	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //////////////////////// 기존 Dependency 
+	implementation      'org.springframework.boot:spring-boot-starter-data-jpa'
+	// webmvc -> web
+    implementation      'org.springframework.boot:spring-boot-starter-web'
+    implementation      'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
+    developmentOnly     'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly         'org.mariadb.jdbc:mariadb-java-client'
+
+    // lombok 
+    compileOnly         'org.projectlombok:lombok:1.18.36'
+	annotationProcessor 'org.projectlombok:lombok:1.18.36'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	testImplementation  'org.springframework.boot:spring-boot-starter-test'
+	testImplementation  'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
+	testRuntimeOnly     'org.junit.platform:junit-platform-launcher'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 	testCompileOnly 'org.projectlombok:lombok'
@@ -54,3 +90,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+

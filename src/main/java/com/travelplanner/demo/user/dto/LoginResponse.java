@@ -18,9 +18,9 @@ public class LoginResponse {
     @Schema(description = "사용자 이름", example = "홍길동")
     private String name;
 
-    @Schema(description = "Access Token (JWT)", example = "eyJhbGciOiJIUzI1NiJ9...")
+    @Schema(description = "Access Token (JWT)")
     private String accessToken;
 
-    @Schema(description = "Refresh Token (JWT)", example = "eyJhbGciOiJIUzI1NiJ9...")
+    @Schema(description = "Refresh Token (JWT)")
     private String refreshToken;
 }

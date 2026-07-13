@@ -16,7 +16,7 @@ import lombok.*;
 @Builder
 public class RegisterRequest {
 
-    @Schema(description = "사용자 ID", example = "user01", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "사용자 ID", example = "user123", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "User ID is required")
     @Size(min = 1, max = 20, message = "User ID must be between 1 and 20 characters")
     private String userId;
