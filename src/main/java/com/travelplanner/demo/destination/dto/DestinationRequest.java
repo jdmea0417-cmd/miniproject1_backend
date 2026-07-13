@@ -17,7 +17,7 @@ public class DestinationRequest {
 
     @Schema(description = "검색 키워드 목록", example = "[\"경복궁\", \"북촌한옥마을\"]", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "At least one keyword is required")
-    private List<String> keyword;
+    private List<String> keywords;
 
     @Schema(description = "방문 날짜 (YYYY-MM-DD)", example = "2026-07-08")
     private String date;
@@ -29,7 +29,7 @@ public class DestinationRequest {
      * Set a single keyword as a list for backward compatibility with string input.
      * @param keyword a single keyword
      */
-    public void setKeyword(String keyword) {
-        this.keyword = Collections.singletonList(keyword);
+    public void setKeywords(String keyword) {
+        this.keywords = Collections.singletonList(keyword);
     }
 }

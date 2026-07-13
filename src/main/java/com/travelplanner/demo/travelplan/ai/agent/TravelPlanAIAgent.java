@@ -76,7 +76,7 @@ public class TravelPlanAIAgent {
                                 request.getStartDate(), 
                                 request.getEndDate(), 
                                 request.getDestinations().stream()
-                                    .flatMap(dr -> dr.getKeyword().stream())
+                                    .flatMap(dr -> dr.getKeywords().stream())
                                     .collect(Collectors.joining(", "))))
                 .call()
                 .entity(TravelPlanResponse.class);
