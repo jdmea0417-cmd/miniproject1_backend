@@ -25,7 +25,6 @@ public class TravelPlanAIAgent {
     private String key;
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
-    private String endPoint = "https://api.openai.com/v1/chat/completions";
 
     /**
      * 여행 계획 요청을 기반으로 AI에게 여행 계획을 생성하도록 요청합니다.
@@ -36,7 +35,6 @@ public class TravelPlanAIAgent {
     public TravelPlanResponse generateTravelPlan(TravelPlanRequest request) {
         log.debug(">>>> travel plan agent generateTravelPlan start");
         System.out.println(">>>> debug openai service  model    : " + model);
-        System.out.println(">>>> debug openai service  endPoint : " + endPoint);
 
         // 시스템 프롬프트: JSON 형식으로 결과 출력 지시
         TravelPlanResponse response = chatClient.prompt()
@@ -44,15 +42,21 @@ public class TravelPlanAIAgent {
                                 반드시 json 형태로 응답
                         """)
                 .user("""
-                            너는 여행지에 따라 상세계획을 짜주는 전문가야
-                            동선과 식사 시간, 등을 고려하여
-                            식당, 숙소를 포함,
-                            조건과 아래 규칙에 맞게 응답할 것
+                            너는 여행지에 따라 상세계획을 짜주는 전문가
+                            조건과 아래 규칙에 맞게 응답할 것.
+
                             조건
                             - 지역 : "%s"
                             - 여행 시작일 : "%s"
                             - 여행 종료일 : "%s"
                             - 필수 방문지 : "%s"
+                            1. 동선을 고려할 것.
+                            2. 전체 계획의 시작은 항상 여행지로 도착일 것(공항, 역 등)
+                            3. 전체 계획의 끝은 항상 여행지에서 출발일 것(공항, 역 등)
+                            4. 필수 여행지를 첫 순서로 배치할 필요는 없으며, 여러번 방문할 필요도 없음
+                            5. 일과 중 반드시 아침, 점심 저녁 식사가 포함되어야 하며, 정확한 식당명을 응답할 것.
+                            6. 일과의 마무리는 항상 숙소여야 함. 정확한 숙소 명을 응답할 것.
+                            
                             출력예시
                             {
                                 "area" : "여행지역",

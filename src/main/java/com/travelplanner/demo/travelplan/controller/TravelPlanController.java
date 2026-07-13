@@ -19,7 +19,7 @@ import java.util.List;
 @Tag(name = "Travel Planner", description = "여행 계획 CRUD API")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/travel-plan")
 @RequiredArgsConstructor
 public class TravelPlanController {
 
@@ -34,9 +34,11 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 생성", description = "새로운 여행 계획을 생성합니다. (JWT 인증 필요)")
-    @PostMapping("/travel-plan")
+    @PostMapping
     public ResponseEntity<TravelPlanResponse> createTravelPlan(
             @Parameter(description = "요청 바디", required = true) @Valid @RequestBody TravelPlanRequest request) {
+        System.out.println(">>>> debug travel plan controller createTravelPlan");
+        System.out.println(">>>> debug param : "+request);
         String userId = getCurrentUserId();
         if (userId == null) {
             return ResponseEntity.status(401).build();
@@ -46,7 +48,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 목록 조회", description = "인증된 사용자의 여행 계획 목록을 조회합니다. (JWT 인증 필요)")
-    @GetMapping("/travel-plan")
+    @GetMapping
     public ResponseEntity<List<TravelPlanResponse>> getTravelPlans() {
         String userId = getCurrentUserId();
         if (userId == null) {
@@ -57,7 +59,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "여행 계획 ID로 상세 정보를 조회합니다. (JWT 인증 필요)")
-    @GetMapping("/travel-plan/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<TravelPlanResponse> getTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();
@@ -69,7 +71,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 수정", description = "기존 여행 계획을 수정합니다. (JWT 인증 필요)")
-    @PutMapping("/travel-plan/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<TravelPlanResponse> updateTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id,
             @Valid @RequestBody TravelPlanRequest request) {
