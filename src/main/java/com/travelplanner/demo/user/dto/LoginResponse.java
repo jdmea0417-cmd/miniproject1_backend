@@ -12,7 +12,7 @@ import lombok.*;
 @Schema(description = "로그인 응답 (Access Token, Refresh Token 포함)")
 public class LoginResponse {
 
-    @Schema(description = "사용자 ID", example = "user01")
+    @Schema(description = "사용자 ID", example = "user123")
     private String userId;
 
     @Schema(description = "사용자 이름", example = "홍길동")
