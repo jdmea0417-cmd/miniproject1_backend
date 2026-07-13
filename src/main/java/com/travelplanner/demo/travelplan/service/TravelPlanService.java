@@ -91,7 +91,7 @@ public class TravelPlanService {
             for (com.travelplanner.demo.destination.dto.DestinationRequest destReq : request.getDestinations()) {
                 DestinationEntity destination = DestinationEntity.builder()
                         .travelPlan(travelPlan)
-                        .place(destReq.getKeyword())
+                        .place(String.join(", ", destReq.getKeyword()))
                         .date(destReq.getDate())
                         .time(destReq.getTime())
                         .build();

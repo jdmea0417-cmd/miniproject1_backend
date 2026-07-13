@@ -19,6 +19,7 @@ import com.travelplanner.demo.destination.dto.DestinationRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @Schema(description = "여행 계획 생성/수정 요청")
 public class TravelPlanRequest {
 

@@ -98,7 +98,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
-    @DeleteMapping("/travel-plan/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();
