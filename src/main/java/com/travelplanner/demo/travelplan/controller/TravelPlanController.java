@@ -19,7 +19,7 @@ import java.util.List;
 @Tag(name = "Travel Planner", description = "여행 계획 CRUD API")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/v1/travel-planner")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class TravelPlanController {
 
@@ -34,7 +34,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 생성", description = "새로운 여행 계획을 생성합니다. (JWT 인증 필요)")
-    @PostMapping
+    @PostMapping("/travel-plan")
     public ResponseEntity<TravelPlanResponse> createTravelPlan(
             @Parameter(description = "요청 바디", required = true) @Valid @RequestBody TravelPlanRequest request) {
         String userId = getCurrentUserId();
@@ -45,8 +45,8 @@ public class TravelPlanController {
         return ResponseEntity.ok(response);
     }
 
-@Operation(summary = "여행 계획 목록 조회", description = "인증된 사용자의 여행 계획 목록을 조회합니다. (JWT 인증 필요)")
-    @GetMapping
+    @Operation(summary = "여행 계획 목록 조회", description = "인증된 사용자의 여행 계획 목록을 조회합니다. (JWT 인증 필요)")
+    @GetMapping("/travel-plan")
     public ResponseEntity<List<TravelPlanResponse>> getTravelPlans() {
         String userId = getCurrentUserId();
         if (userId == null) {
@@ -57,7 +57,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "여행 계획 ID로 상세 정보를 조회합니다. (JWT 인증 필요)")
-    @GetMapping("/{id}")
+    @GetMapping("/travel-plan/{id}")
     public ResponseEntity<TravelPlanResponse> getTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();
@@ -69,7 +69,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 수정", description = "기존 여행 계획을 수정합니다. (JWT 인증 필요)")
-    @PutMapping("/{id}")
+    @PutMapping("/travel-plan/{id}")
     public ResponseEntity<TravelPlanResponse> updateTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id,
             @Valid @RequestBody TravelPlanRequest request) {
@@ -82,7 +82,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/travel-plan/{id}")
     public ResponseEntity<Void> deleteTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();
