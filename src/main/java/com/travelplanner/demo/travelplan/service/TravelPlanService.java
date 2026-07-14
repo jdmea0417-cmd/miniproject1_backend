@@ -8,7 +8,9 @@ import com.travelplanner.demo.travelplan.repository.TravelPlanRepository;
 import com.travelplanner.demo.user.entity.UserEntity;
 import com.travelplanner.demo.user.repository.UserRepository;
 import com.travelplanner.demo.destination.dto.DestinationResponse;
+import com.travelplanner.demo.destination.dto.DestinationUpdateRequest;
 import com.travelplanner.demo.destination.entity.DestinationEntity;
+import com.travelplanner.demo.destination.repository.DestinationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class TravelPlanService {
     private final UserRepository userRepository;
     private final TravelPlanRepository travelPlanRepository;
     private final TravelPlanAIAgent travelPlanAIAgent;
+    private final DestinationRepository destinationRepository;
 
     public TravelPlanResponse create(String userId, TravelPlanRequest request) {
         log.info("여행 계획 생성 요청: userId={}, area={}", userId, request.getArea());
@@ -107,5 +110,21 @@ public class TravelPlanService {
         TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel plan not found: " + id));
         travelPlanRepository.delete(travelPlan);
+    }
+
+    public void updateDestination(Integer destinationId, String userId, DestinationUpdateRequest request) {
+        DestinationEntity destination = destinationRepository.findByIdAndTravelPlan_User_UserId(destinationId, userId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Destination not found or access denied: " + destinationId));
+
+        destination.setPlace(request.getPlace());
+        if (request.getDate() != null) {
+            destination.setDate(request.getDate());
+        }
+        if (request.getTime() != null) {
+            destination.setTime(request.getTime());
+        }
+
+        destinationRepository.save(destination);
     }
 }

@@ -13,6 +13,7 @@ import com.travelplanner.demo.destination.dto.DestinationRequest;
 import com.travelplanner.demo.travelplan.ai.dto.*;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,19 @@ public class TravelPlanAIAgent {
     public TravelPlanResponse generateTravelPlan(TravelPlanRequest request) {
         log.debug(">>>> travel plan agent generateTravelPlan start");
         System.out.println(">>>> debug openai service  model    : " + model);
+
+        // 1단계: 여행 후보 장소 선정
+        String requiredDestinations = request.getDestinations().stream()
+                .map(d -> d.getKeywords())
+                .flatMap(List::stream)
+                .collect(Collectors.joining(", "));
+        CandidatePlaceResponse candidates = listUpCandidatePlaces(request, requiredDestinations);
+
+        // 2단계: 일정 초안 구성
+        DraftScheduleResponse draftSchedule = makeDraftSchedule(request, candidates);
+
+        // 3단계: 최종 일정 정제 및 검수
+        TravelPlanResponse finalResponse = finalizeSchedule(request, draftSchedule);
 
         return finalResponse;
     }
