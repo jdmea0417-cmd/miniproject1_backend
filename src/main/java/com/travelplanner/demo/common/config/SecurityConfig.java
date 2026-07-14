@@ -28,7 +28,8 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
-    private final JwtAuthenticationFilter  jwtAuthenticationFilter;
+    private final com.travelplanner.demo.common.token.JwtProvider jwtProvider;
+    private final com.travelplanner.demo.common.service.RedisService redisService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,7 +74,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
