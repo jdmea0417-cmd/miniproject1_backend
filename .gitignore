@@ -28,3 +28,7 @@ logs/
 # Temp
 tmp/
 temp/
+bin/
+*.class
+bin/
+*.class

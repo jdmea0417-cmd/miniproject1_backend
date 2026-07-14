@@ -13,7 +13,7 @@ import lombok.*;
 @Schema(description = "로그인 요청")
 public class LoginRequest {
 
-    @Schema(description = "사용자 ID", example = "user01", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "사용자 ID", example = "user123", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "User ID is required")
     private String userId;
 
