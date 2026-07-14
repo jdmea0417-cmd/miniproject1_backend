@@ -1,0 +1,79 @@
+WBS (Work Breakdown Structure)
+
+1. Project Management
+  1.1 Kick-off and Requirements Definition
+  1.2 Schedule Planning and Resource Allocation
+  1.3 Risk Management Planning
+  1.4 Weekly Progress Meetings and Reporting
+  1.5 Final Review and Deployment Preparation
+
+2. Analysis and Design
+  2.1 Requirements Analysis (Functional and Non-Functional)
+  2.2 Architecture Design (Backend, Frontend, DB, Cache)
+  2.3 Database Modeling (ERD Design)
+  2.4 API Specification (Swagger/OpenAPI)
+  2.5 UI/UX Wireframe Design
+  2.6 Security Design (JWT, Password Encryption, CORS)
+
+3. Environment Setup
+  3.1 Development Environment Setup (JDK, IDE, Docker, Node.js)
+  3.2 Backend Project Initialization (Spring Initializr)
+  3.3 Frontend Project Initialization (Vite + React + MUI)
+  3.4 Database and Redis Installation and Configuration
+  3.5 CI/CD Pipeline Basic Setup (Optional: GitHub Actions)
+
+4. Backend Implementation
+  4.1 Project Structure Setup (Packages, Lombok, Config Classes)
+  4.2 Entity Definition (User, TravelPlan, Destination)
+  4.3 Repository Implementation (Spring Data JPA)
+  4.4 Service Layer Implementation (Business Logic, Transactions)
+  4.5 Controller Implementation (REST API, Validation, Swagger Annotations)
+  4.6 JWT Authentication/Authorization and Filter Implementation
+  4.7 Global Exception Handling (Filter, Provider)
+  4.8 Redis Integration (Token Blacklist)
+  4.9 AI Integration Module (Spring AI + OpenAI GPT-4o-mini)
+  4.10 Exception Handling and Global Error Handler
+  4.11 Unit and Integration Testing (JUnit, Mockito)
+  4.12 API Documentation (Swagger UI)
+
+5. Frontend Implementation
+  5.1 Project Structure Setup (Components, Pages, Hooks, Contexts, API)
+  5.2 Routing Setup (React Router)
+  5.3 Authentication Context (Access Token Storage and Refresh)
+  5.4 Login/Register Page Implementation (Form, Validation)
+  5.5 Main Page (Destination Input, Date Selection, AI Recommendation Button)
+  5.6 Travel Plan List Page (Table, Pagination)
+  5.7 Travel Plan Detail Page (List Display, Edit/Delete Buttons)
+  5.8 Destination Management Modal (Create/Update/Delete)
+  5.9 Axios Instance Setup (Base URL, Interceptor for JWT Injection)
+  5.10 State Management (React Hooks or Context)
+  5.11 Styling (MUI Theme, Responsive)
+  5.12 Unit Testing (Jest, React Testing Library) - Optional
+
+6. Integration Testing and Verification
+  6.1 API Endpoint Testing (Postman or REST Client)
+  6.2 Frontend-Backend Integration Testing (CORS, Authentication Flow)
+  6.3 Scenario-based Testing (Register -> Login -> Travel Plan Creation -> AI Recommendation -> Query -> Update -> Delete)
+  6.4 Performance Testing (Light Load Test: JMeter or k6)
+  6.5 Security Check (JWT Theft Prevention, HTTPS Precautions)
+
+7. Deployment and Release
+  7.1 Local Execution Scripts Preparation (README Update)
+  7.2 Dockerfile and docker-compose.yml Creation (Optional)
+  7.3 Final Build and Deployment Verification
+  7.4 Deployment Manual Writing
+
+8. Documentation and Deliverables
+  8.1 Requirements Specification Document
+  8.2 WBS Document
+  8.3 Screen Design Document / Wireframes
+  8.4 ERD and Table Specification Document
+  8.5 Test Case Document
+  8.6 Result Report
+  8.7 Final Presentation PPT
+
+9. Project Closure
+  9.0 Final Check and Bug Fixing
+  9.1 Package Artifacts and Prepare Submission Folder
+  9.2 Presentation Preparation and Rehearsal
+  9.3 Final Submission (July 15, 23:59)

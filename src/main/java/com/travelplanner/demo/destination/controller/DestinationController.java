@@ -28,19 +28,6 @@ public class DestinationController {
 
     private final DestinationService destinationService;
 
-    // @Operation(summary = "여행지 생성", description = "새로운 여행지를 생성합니다. (JWT 인증 필요)")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "201", description = "생성 성공",
-    //                 content = @Content(schema = @Schema(implementation = DestinationResponse.class))),
-    //         @ApiResponse(responseCode = "400", description = "유효하지 않은 요청"),
-    //         @ApiResponse(responseCode = "401", description = "인증 실패")
-    // })
-    // @PostMapping
-    // public ResponseEntity<?> createDestination(@Valid @RequestBody DestinationRequest request) {
-    //     DestinationResponse response = destinationService.create(request);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    // }
-
     @Operation(summary = "여행지 수정", description = "기존 여행지를 수정합니다. (JWT 인증 필요)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수정 성공",
@@ -49,24 +36,30 @@ public class DestinationController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "여행지를 찾을 수 없음")
     })
-    @PutMapping("/travel-plan/{id}")
+    @PutMapping("/destinations/{id}")
     public ResponseEntity<?> updateDestination(
             @Parameter(description = "여행지 ID", example = "1", required = true) @PathVariable Integer id,
             @Valid @RequestBody DestinationRequest request) {
+        System.out.println(">>>> debug destination controller update destination");
+        System.out.println(">>>> debug param : " + request);
         DestinationResponse response = destinationService.update(id, request);
-        return ResponseEntity.ok(response);
+        if (response != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
     }
 
-    // @Operation(summary = "여행지 삭제", description = "ID로 여행지를 삭제합니다. (JWT 인증 필요)")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "204", description = "삭제 성공"),
-    //         @ApiResponse(responseCode = "401", description = "인증 실패"),
-    //         @ApiResponse(responseCode = "404", description = "여행지를 찾을 수 없음")
-    // })
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<?> deleteDestination(
-    //         @Parameter(description = "여행지 ID", example = "1", required = true) @PathVariable Integer id) {
-    //     destinationService.delete(id);
-    //     return ResponseEntity.noContent().build();
-    // }
+    @Operation(summary = "여행지 삭제", description = "ID로 여행지를 삭제합니다. (JWT 인증 필요)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "삭제 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "여행지를 찾을 수 없음")
+    })
+    @DeleteMapping("/destinations/{id}")
+    public ResponseEntity<?> deleteDestination(
+            @Parameter(description = "여행지 ID", example = "1", required = true) @PathVariable Integer id) {
+        destinationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -31,13 +31,19 @@ public class DestinationService {
     }
 
     public DestinationResponse update(Integer id, DestinationRequest request) {
+        System.out.println(">>>> debug destination service update");
+        System.out.println(">>>> debug param : "+request);
         DestinationEntity entity = destinationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Destination not found with id: " + id));
         entity.setDate(request.getDate());
         entity.setTime(request.getTime());
-        entity.setPlace(request.getKeywords() != null && !request.getKeywords().isEmpty()
-                ? String.join(", ", request.getKeywords())
-                : "");
+        // place 필드 우선, 없으면 keywords 조합
+        String placeValue = (request.getPlace() != null && !request.getPlace().isBlank())
+                ? request.getPlace()
+                : (request.getKeywords() != null && !request.getKeywords().isEmpty()
+                        ? String.join(", ", request.getKeywords())
+                        : "");
+        entity.setPlace(placeValue);
         DestinationEntity updated = destinationRepository.save(entity);
         return DestinationResponse.fromEntity(updated);
     }

@@ -84,38 +84,6 @@ public class TravelPlanController {
         }
     }
 
-    @Operation(summary = "여행 계획 수정", description = "기존 여행 계획을 수정합니다. (JWT 인증 필요)")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateTravelPlan(
-            @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id,
-            @Valid @RequestBody TravelPlanRequest request) {
-        String userId = getCurrentUserId();
-        if (userId == null) {
-            return ResponseEntity.status(401).build();
-        }
-        TravelPlanResponse response = travelPlanService.updateTravelPlan(id, userId, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "개별 여행지 수정", description = "타임라인에서 특정 목적지 카드 하나를 수정합니다. (JWT 인증 필요)")
-    @PutMapping("/{travelPlanId}/destination")
-    public ResponseEntity<?> updateDestination(
-            @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer travelPlanId,
-            @Valid @RequestBody com.travelplanner.demo.destination.dto.DestinationUpdateRequest request) {
-        String userId = getCurrentUserId();
-        if (userId == null) {
-            return ResponseEntity.status(401).build();
-        }
-        try {
-            travelPlanService.updateDestination(travelPlanId, userId, request);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravelPlan(
