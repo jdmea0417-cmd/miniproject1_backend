@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @Schema(description = "여행지 응답")
 public class DestinationResponse {
 

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +21,7 @@ import java.util.List;
 @Tag(name = "Travel Planner", description = "여행 계획 CRUD API")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/travel-plan")
 @RequiredArgsConstructor
 public class TravelPlanController {
 
@@ -34,43 +36,57 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 생성", description = "새로운 여행 계획을 생성합니다. (JWT 인증 필요)")
-    @PostMapping("/travel-plan")
-    public ResponseEntity<TravelPlanResponse> createTravelPlan(
+    @PostMapping
+    public ResponseEntity<?> createTravelPlan(
             @Parameter(description = "요청 바디", required = true) @Valid @RequestBody TravelPlanRequest request) {
+        System.out.println(">>>> debug travel plan controller createTravelPlan");
+        System.out.println(">>>> debug param : " + request);
         String userId = getCurrentUserId();
         if (userId == null) {
             return ResponseEntity.status(401).build();
         }
-        TravelPlanResponse response = travelPlanService.create(userId, request);
-        return ResponseEntity.ok(response);
+        try {
+            TravelPlanResponse response = travelPlanService.create(userId, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Operation(summary = "여행 계획 목록 조회", description = "인증된 사용자의 여행 계획 목록을 조회합니다. (JWT 인증 필요)")
-    @GetMapping("/travel-plan")
-    public ResponseEntity<List<TravelPlanResponse>> getTravelPlans() {
+    @GetMapping
+    public ResponseEntity<?> getTravelPlans() {
         String userId = getCurrentUserId();
         if (userId == null) {
             return ResponseEntity.status(401).build();
         }
         List<TravelPlanResponse> responses = travelPlanService.getTravelPlans(userId);
-        return ResponseEntity.ok(responses);
+        if (responses.size() != 0) {
+            return ResponseEntity.status(HttpStatus.OK).body(responses);
+        } else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "여행 계획 ID로 상세 정보를 조회합니다. (JWT 인증 필요)")
-    @GetMapping("/travel-plan/{id}")
-    public ResponseEntity<TravelPlanResponse> getTravelPlan(
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();
         if (userId == null) {
             return ResponseEntity.status(401).build();
         }
         TravelPlanResponse response = travelPlanService.getTravelPlan(id, userId);
-        return ResponseEntity.ok(response);
+        if (response != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
     }
 
     @Operation(summary = "여행 계획 수정", description = "기존 여행 계획을 수정합니다. (JWT 인증 필요)")
-    @PutMapping("/travel-plan/{id}")
-    public ResponseEntity<TravelPlanResponse> updateTravelPlan(
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id,
             @Valid @RequestBody TravelPlanRequest request) {
         String userId = getCurrentUserId();
@@ -82,7 +98,7 @@ public class TravelPlanController {
     }
 
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
-    @DeleteMapping("/travel-plan/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravelPlan(
             @Parameter(description = "여행 계획 ID", example = "1", required = true) @PathVariable Integer id) {
         String userId = getCurrentUserId();

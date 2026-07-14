@@ -12,6 +12,7 @@ import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
 import com.travelplanner.demo.destination.dto.DestinationRequest;
 import com.travelplanner.demo.travelplan.ai.dto.*;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,24 +28,15 @@ public class TravelPlanAIAgent {
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
 
+    /**
+     * 여행 계획 요청을 기반으로 AI에게 여행 계획을 생성하도록 요청합니다.
+     *
+     * @param request 여행 계획 요청 (지역, 시작일, 종료일, 목적지 키워드 목록)
+     * @return AI가 생성한 여행 계획 내용 (JSON 형태의 문자열)
+     */
     public TravelPlanResponse generateTravelPlan(TravelPlanRequest request) {
-        log.debug(">>>> travel plan agent multi-step generation start");
-
-        String requiredDestinations = request.getDestinations().stream()
-                .map(DestinationRequest::getKeyword)
-                .collect(Collectors.joining(", "));
-
-        // 1차 AI 호출: 후보 여행지 리스트업
-        CandidatePlaceResponse candidates = listUpCandidatePlaces(request, requiredDestinations);
-        log.debug("Step 1 Candidates: {}", candidates);
-
-        // 2차 AI 호출: 동선, 시간, 식사, 이동 포함해서 일정 초안 생성
-        DraftScheduleResponse draftSchedule = makeDraftSchedule(request, candidates);
-        log.debug("Step 2 Draft Schedule: {}", draftSchedule);
-
-        // 3차 AI 호출: 최종 JSON 형식 정리 + 누락/비현실성 검토
-        TravelPlanResponse finalResponse = finalizeSchedule(request, draftSchedule);
-        log.debug("Step 3 Final Response: {}", finalResponse);
+        log.debug(">>>> travel plan agent generateTravelPlan start");
+        System.out.println(">>>> debug openai service  model    : " + model);
 
         return finalResponse;
     }
@@ -59,22 +51,22 @@ public class TravelPlanAIAgent {
                         설명, markdown, 주석은 금지한다.
                         """)
                 .user("""
-                        입력
-                        - 지역: "%s"
-                        - 여행 시작일: "%s"
-                        - 여행 종료일: "%s"
-                        - 필수 방문지: "%s"
+                            너는 여행지에 따라 상세계획을 짜주는 전문가
+                            조건과 아래 규칙에 맞게 응답할 것.
 
-                        규칙
-                        1. 여행 기간과 지역을 고려해 방문 후보지를 고른다.
-                        2. 필수 방문지는 가능한 모두 포함한다.
-                        3. 관광지, 식사 후보, 이동 거점도 포함한다.
-                        4. 장소별 예상 체류시간을 적는다.
-                        5. 영업시간 확인이 필요한 장소는 note에 표시한다.
-
-                        출력 예시
-                        {
-                          "places": [
+                            조건
+                            - 지역 : "%s"
+                            - 여행 시작일 : "%s"
+                            - 여행 종료일 : "%s"
+                            - 필수 방문지 : "%s"
+                            1. 동선을 고려할 것.
+                            2. 계획의 시작은 항상 여행지로 도착일 것(공항, 역 등)
+                            3. 계획의 끝은 항상 여행지에서 출발일 것(공항, 역 등)
+                            4. 필수 여행지를 첫 순서로 배치할 필요는 없으며, 여러번 방문할 필요도 없음
+                            5. 일과 중 반드시 아침, 점심 저녁 식사가 포함되어야 하며, 정확한 식당명을 응답할 것.
+                            6. 일과의 마무리는 항상 숙소여야 함. 정확한 숙소 명을 응답할 것.
+                            
+                            출력예시
                             {
                               "name": "국립중앙박물관",
                               "type": "관광지",
@@ -85,10 +77,12 @@ public class TravelPlanAIAgent {
                           ]
                         }
                         """.formatted(
-                        request.getArea(),
-                        request.getStartDate(),
-                        request.getEndDate(),
-                        requiredDestinations))
+                                request.getArea(), 
+                                request.getStartDate(), 
+                                request.getEndDate(), 
+                                request.getDestinations().stream()
+                                    .flatMap(dr -> dr.getKeywords().stream())
+                                    .collect(Collectors.joining(", "))))
                 .call()
                 .entity(CandidatePlaceResponse.class);
     }

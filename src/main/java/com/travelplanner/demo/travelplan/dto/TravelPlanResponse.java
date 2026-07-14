@@ -16,6 +16,7 @@ import com.travelplanner.demo.destination.dto.DestinationResponse;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @Schema(description = "여행 계획 응답")
 public class TravelPlanResponse {
 
