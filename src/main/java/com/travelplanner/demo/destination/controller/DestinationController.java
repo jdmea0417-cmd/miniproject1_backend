@@ -22,7 +22,7 @@ import java.util.List;
 @Tag(name = "Destination", description = "여행지 CRUD API")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/v1/destinations")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class DestinationController {
 
@@ -35,7 +35,7 @@ public class DestinationController {
             @ApiResponse(responseCode = "400", description = "유효하지 않은 요청"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PostMapping
+    // @PostMapping
     public ResponseEntity<?> createDestination(@Valid @RequestBody DestinationRequest request) {
         DestinationResponse response = destinationService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -49,7 +49,7 @@ public class DestinationController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "여행지를 찾을 수 없음")
     })
-    @PutMapping("/{id}")
+    @PutMapping("/travel-plan/{id}")
     public ResponseEntity<?> updateDestination(
             @Parameter(description = "여행지 ID", example = "1", required = true) @PathVariable Integer id,
             @Valid @RequestBody DestinationRequest request) {
@@ -63,7 +63,7 @@ public class DestinationController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "여행지를 찾을 수 없음")
     })
-    @DeleteMapping("/{id}")
+    // @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDestination(
             @Parameter(description = "여행지 ID", example = "1", required = true) @PathVariable Integer id) {
         destinationService.delete(id);
