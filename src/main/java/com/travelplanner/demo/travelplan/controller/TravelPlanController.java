@@ -97,6 +97,25 @@ public class TravelPlanController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "개별 여행지 수정", description = "타임라인에서 특정 목적지 카드 하나를 수정합니다. (JWT 인증 필요)")
+    @PutMapping("/destination/{destinationId}")
+    public ResponseEntity<?> updateDestination(
+            @Parameter(description = "목적지 ID", example = "1", required = true) @PathVariable Integer destinationId,
+            @Valid @RequestBody com.travelplanner.demo.destination.dto.DestinationUpdateRequest request) {
+        String userId = getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            travelPlanService.updateDestination(destinationId, userId, request);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @Operation(summary = "여행 계획 삭제", description = "여행 계획을 삭제합니다. (JWT 인증 필요)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravelPlan(

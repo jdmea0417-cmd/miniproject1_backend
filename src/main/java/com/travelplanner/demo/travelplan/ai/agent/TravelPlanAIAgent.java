@@ -11,6 +11,7 @@ import com.travelplanner.demo.travelplan.dto.TravelPlanRequest;
 import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.travelplanner.demo.destination.dto.DestinationRequest;
@@ -40,7 +41,7 @@ public class TravelPlanAIAgent {
         // 시스템 프롬프트: JSON 형식으로 결과 출력 지시
         TravelPlanResponse response = chatClient.prompt()
                 .system("""
-                                반드시 json 형태로 응답
+                                반드시 json 형态로 응답
                         """)
                 .user("""
                             너는 여행지에 따라 상세계획을 짜주는 전문가
@@ -57,7 +58,7 @@ public class TravelPlanAIAgent {
                             4. 필수 여행지를 첫 순서로 배치할 필요는 없으며, 여러번 방문할 필요도 없음
                             5. 일과 중 반드시 아침, 점심 저녁 식사가 포함되어야 하며, 정확한 식당명을 응답할 것.
                             6. 일과의 마무리는 항상 숙소여야 함. 정확한 숙소 명을 응답할 것.
-                            
+
                             출력예시
                             {
                                 "area" : "여행지역",
@@ -72,9 +73,9 @@ public class TravelPlanAIAgent {
                                 ]
                             }
                         """.formatted(
-                                request.getArea(), 
-                                request.getStartDate(), 
-                                request.getEndDate(), 
+                                request.getArea(),
+                                request.getStartDate(),
+                                request.getEndDate(),
                                 request.getDestinations().stream()
                                     .flatMap(dr -> dr.getKeywords().stream())
                                     .collect(Collectors.joining(", "))))
