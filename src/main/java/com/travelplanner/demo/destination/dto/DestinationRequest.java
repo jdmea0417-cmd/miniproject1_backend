@@ -24,12 +24,4 @@ public class DestinationRequest {
 
     @Schema(description = "방문 시간 (HH:mm:ss)", example = "10:00:00")
     private String time;
-
-    /**
-     * Set a single keyword as a list for backward compatibility with string input.
-     * @param keyword a single keyword
-     */
-    public void setKeywords(String keyword) {
-        this.keywords = Collections.singletonList(keyword);
-    }
 }
