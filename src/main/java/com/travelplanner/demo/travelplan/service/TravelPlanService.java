@@ -47,12 +47,16 @@ public class TravelPlanService {
 
 if (aiResponse.getDestinations() != null) {
             for (DestinationResponse destResp : aiResponse.getDestinations()) {
+                String weather = destResp.getWeather();
+                if (weather == null || weather.isBlank()) {
+                    weather = "알 수 없음";
+                }
                 DestinationEntity destination = DestinationEntity.builder()
                         .travelPlan(plan)
                         .place(destResp.getPlace())
                         .date(destResp.getDate())
                         .time(destResp.getTime())
-                        .weather(destResp.getWeather())
+                        .weather(weather)
                         .build();
                 plan.addDestination(destination);
             }
