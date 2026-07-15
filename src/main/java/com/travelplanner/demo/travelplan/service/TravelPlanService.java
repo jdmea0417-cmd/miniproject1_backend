@@ -48,13 +48,14 @@ public class TravelPlanService {
                 .endDate(request.getEndDate())
                 .build();
 
-        if (aiResponse.getDestinations() != null) {
+if (aiResponse.getDestinations() != null) {
             for (DestinationResponse destResp : aiResponse.getDestinations()) {
                 DestinationEntity destination = DestinationEntity.builder()
                         .travelPlan(plan)
                         .place(destResp.getPlace())
                         .date(destResp.getDate())
                         .time(destResp.getTime())
+                        .weather(destResp.getWeather())
                         .build();
                 plan.addDestination(destination);
             }
