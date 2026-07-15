@@ -20,6 +20,9 @@ public class DestinationResponse {
     @Schema(description = "날짜", example = "2026-07-08")
     private String date;
 
+    @Schema(description = "날씨", example = "맑음")
+    private String weather;
+
     @Schema(description = "시간", example = "14:30:00")
     private String time;
 
@@ -30,6 +33,7 @@ public class DestinationResponse {
         return DestinationResponse.builder()
             .id(entity.getId())
             .date(entity.getDate())
+            .weather(entity.getWeather())
             .time(entity.getTime())
             .place(entity.getPlace())
             .build();

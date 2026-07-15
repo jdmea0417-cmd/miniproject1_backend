@@ -32,6 +32,18 @@ spring:
         options:
           model: ${OPEN_AI_MODEL}
 
+  # WebClient 설정
+  webclient:
+    openweathermap:
+      base-url: https://api.openweathermap.org/data/2.5
+      timeout: 5000
+
+# Weather API 설정
+weather:
+  api:
+    key: ${OPEN_WEATHER_API_KEY:}
+    base-url: https://api.openweathermap.org/data/2.5
+
 # JWT 설정
 jwt:
   secret: ${JWT_SECRET_KEY:travel-planner-secret-key-2026-min-256-bits-length}

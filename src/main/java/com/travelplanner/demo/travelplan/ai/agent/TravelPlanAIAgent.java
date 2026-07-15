@@ -10,10 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import com.travelplanner.demo.travelplan.dto.TravelPlanRequest;
 import com.travelplanner.demo.travelplan.dto.TravelPlanResponse;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import com.travelplanner.demo.destination.dto.DestinationRequest;
+import com.travelplanner.demo.api.weather.service.WeatherService;
+import com.travelplanner.demo.api.weather.dto.WeatherResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,8 @@ public class TravelPlanAIAgent {
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
 
+    private final WeatherService weatherService;
+
     /**
      * 여행 계획 요청을 기반으로 AI에게 여행 계획을 생성하도록 요청합니다.
      *
@@ -36,6 +39,9 @@ public class TravelPlanAIAgent {
     public TravelPlanResponse generateTravelPlan(TravelPlanRequest request) {
         log.debug(">>>> travel plan agent generateTravelPlan start");
         System.out.println(">>>> debug openai service  model    : " + model);
+
+        List<WeatherResponse> weathers = weatherService.getWeatherByTravelPlan(request);
+        System.out.println(">>>> debug weathers : "+weathers);
 
         // 시스템 프롬프트: JSON 형식으로 결과 출력 지시
         TravelPlanResponse response = chatClient.prompt()
@@ -51,12 +57,14 @@ public class TravelPlanAIAgent {
                             - 여행 시작일 : "%s"
                             - 여행 종료일 : "%s"
                             - 필수 방문지 : "%s"
+                            - 날씨정보 : "%s"
                             1. 동선을 고려할 것.
-                            2. 계획의 시작은 항상 여행지로 도착일 것(공항, 역 등)
-                            3. 계획의 끝은 항상 여행지에서 출발일 것(공항, 역 등)
-                            4. 필수 여행지를 첫 순서로 배치할 필요는 없으며, 여러번 방문할 필요도 없음
-                            5. 일과 중 반드시 아침, 점심 저녁 식사가 포함되어야 하며, 정확한 식당명을 응답할 것.
-                            6. 일과의 마무리는 항상 숙소여야 함. 정확한 숙소 명을 응답할 것.
+                            2. 함께 입력된 날씨정보를 고려하여 계획을 생성할 것, 알 수 없음이면 고려하지 말 것.
+                            3. 계획의 시작은 항상 여행지로 도착일 것(공항, 역 등)
+                            4. 계획의 끝은 항상 여행지에서 출발일 것(공항, 역 등)
+                            5. 필수 여행지를 첫 순서로 배치할 필요는 없으며, 여러번 방문할 필요도 없음
+                            6. 일과 중 반드시 아침, 점심 저녁 식사가 포함되어야 하며, 정확한 식당명을 응답할 것.
+                            7. 일과의 마무리는 항상 숙소여야 함. 정확한 숙소 명을 응답할 것.
                             
                             출력예시
                             {
@@ -66,6 +74,7 @@ public class TravelPlanAIAgent {
                                 "destinations" : [
                                     {
                                         "date" : "여행지 방문일",
+                                        "weather" : "여행지 날씨",
                                         "time" : "여행지 방문시간",
                                         "place" : "여행지"
                                     }
@@ -77,7 +86,9 @@ public class TravelPlanAIAgent {
                                 request.getEndDate(), 
                                 request.getDestinations().stream()
                                     .flatMap(dr -> dr.getKeywords().stream())
-                                    .collect(Collectors.joining(", "))))
+                                    .collect(Collectors.joining(", ")),
+                                weathers
+                                ))
                 .call()
                 .entity(TravelPlanResponse.class);
 
