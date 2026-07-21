@@ -5,7 +5,7 @@ spring:
   application:
     name: demo
   datasource:
-    url: ${DB_URL}
+    url: jdbc:mariadb://localhost:3306/miniproject
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
@@ -25,13 +25,24 @@ spring:
 #      port: 6379
 #      password:
 #      timeout: 6000ms
-
   ai:
     openai:
       api-key: ${OPEN_AI_KEY}
       chat:
         options:
           model: ${OPEN_AI_MODEL}
+
+  # WebClient 설정
+  webclient:
+    openweathermap:
+      base-url: https://api.openweathermap.org/data/2.5
+      timeout: 5000
+
+# Weather API 설정
+weather:
+  api:
+    key: ${OPEN_WEATHER_API_KEY:}
+    base-url: https://api.openweathermap.org/data/2.5
 
 # JWT 설정
 jwt:

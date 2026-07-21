@@ -8,7 +8,9 @@ import com.travelplanner.demo.travelplan.repository.TravelPlanRepository;
 import com.travelplanner.demo.user.entity.UserEntity;
 import com.travelplanner.demo.user.repository.UserRepository;
 import com.travelplanner.demo.destination.dto.DestinationResponse;
+import com.travelplanner.demo.destination.dto.DestinationUpdateRequest;
 import com.travelplanner.demo.destination.entity.DestinationEntity;
+import com.travelplanner.demo.destination.repository.DestinationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class TravelPlanService {
     private final UserRepository userRepository;
     private final TravelPlanRepository travelPlanRepository;
     private final TravelPlanAIAgent travelPlanAIAgent;
+    private final DestinationRepository destinationRepository;
 
     public TravelPlanResponse create(String userId, TravelPlanRequest request) {
         log.info("여행 계획 생성 요청: userId={}, area={}", userId, request.getArea());
@@ -45,13 +48,14 @@ public class TravelPlanService {
                 .endDate(request.getEndDate())
                 .build();
 
-        if (aiResponse.getDestinations() != null) {
+if (aiResponse.getDestinations() != null) {
             for (DestinationResponse destResp : aiResponse.getDestinations()) {
                 DestinationEntity destination = DestinationEntity.builder()
                         .travelPlan(plan)
                         .place(destResp.getPlace())
                         .date(destResp.getDate())
                         .time(destResp.getTime())
+                        .weather(destResp.getWeather())
                         .build();
                 plan.addDestination(destination);
             }
@@ -87,11 +91,13 @@ public class TravelPlanService {
         // Clear existing destinations and replace with new ones
         travelPlan.getDestinations().clear();
 
-        if (request.getDestinations() != null) {
+if (request.getDestinations() != null) {
             for (com.travelplanner.demo.destination.dto.DestinationRequest destReq : request.getDestinations()) {
                 DestinationEntity destination = DestinationEntity.builder()
                         .travelPlan(travelPlan)
-                        .place(String.join(", ", destReq.getKeywords()))
+                        .place((destReq.getPlace() != null && !destReq.getPlace().isBlank())
+                                ? destReq.getPlace()
+                                : String.join(", ", destReq.getKeywords()))
                         .date(destReq.getDate())
                         .time(destReq.getTime())
                         .build();
@@ -107,5 +113,30 @@ public class TravelPlanService {
         TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel plan not found: " + id));
         travelPlanRepository.delete(travelPlan);
+    }
+
+    public void updateDestination(Integer travelPlanId, String userId, DestinationUpdateRequest request) {
+        // 여행 계획 소유자 확인
+        TravelPlanEntity travelPlan = travelPlanRepository.findByIdAndUser_UserId(travelPlanId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Travel plan not found or access denied: " + travelPlanId));
+
+        // 목적지 ID로 검색
+        DestinationEntity destination = destinationRepository.findById(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Destination not found: " + request.getId()));
+
+        // 해당 목적지가 이 여행 계획에 속하는지 확인
+        if (!destination.getTravelPlan().getId().equals(travelPlanId)) {
+            throw new IllegalArgumentException("Destination does not belong to this travel plan");
+        }
+
+        destination.setPlace(request.getPlace());
+        if (request.getDate() != null) {
+            destination.setDate(request.getDate());
+        }
+        if (request.getTime() != null) {
+            destination.setTime(request.getTime());
+        }
+
+        destinationRepository.save(destination);
     }
 }

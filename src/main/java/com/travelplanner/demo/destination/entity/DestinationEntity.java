@@ -23,6 +23,9 @@ public class DestinationEntity {
     @JoinColumn(name = "Travel_ID", nullable = false)
     private TravelPlanEntity travelPlan;
 
+    @Column(name = "WEATHER")
+    private String weather;
+
     @Column(name = "TIME")
     private String time;
 
